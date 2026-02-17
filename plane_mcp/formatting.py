@@ -9,16 +9,12 @@ def project(p) -> str:
     return f"{p.identifier} · {p.name} [{short}]"
 
 
-def work_item(item) -> str:
-    """'#seq · Name (priority) [short_id]'"""
+def work_item(item, project_identifier: str = "", state_name: str | None = None) -> str:
+    """'PROJ-seq (state) · Name [short_id]'"""
     short = uid.encode(item.id) or "?"
-    priority = _enum_str(item.priority)
-    meta = f"({priority})" if priority and priority != "none" else ""
-    parts = [f"#{item.sequence_id}", "·", item.name]
-    if meta:
-        parts.append(meta)
-    parts.append(f"[{short}]")
-    return " ".join(parts)
+    seq = f"{project_identifier}-{item.sequence_id}" if project_identifier else f"#{item.sequence_id}"
+    state_part = f" ({state_name})" if state_name else ""
+    return f"{seq}{state_part} · {item.name} [{short}]"
 
 
 def state(s) -> str:

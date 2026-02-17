@@ -51,12 +51,16 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         """
         client, workspace_slug = get_plane_client_context()
 
+        project = client.projects.retrieve(workspace_slug=workspace_slug, project_id=project_id)
+        project_identifier = project.identifier or ""
+
         params = WorkItemQueryParams(
             cursor=cursor,
             per_page=per_page,
             order_by=order_by,
             external_id=external_id,
             external_source=external_source,
+            expand="state",
         )
 
         response: PaginatedWorkItemResponse = client.work_items.list(
@@ -65,7 +69,18 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             params=params,
         )
 
-        return [formatting.work_item(item) for item in response.results]
+        def _state_name(item) -> str | None:
+            s = item.state
+            if s is None:
+                return None
+            if isinstance(s, str):
+                return None
+            return getattr(s, "name", None)
+
+        return [
+            formatting.work_item(item, project_identifier, _state_name(item))
+            for item in response.results
+        ]
 
     @mcp.tool()
     def create_work_item(
