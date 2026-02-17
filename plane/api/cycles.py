@@ -102,7 +102,7 @@ class Cycles(BaseResource):
         workspace_slug: str,
         project_id: str,
         cycle_id: str,
-        issue_ids: [str],
+        issue_ids: list[str],
     ) -> None:
         """Add work items to a cycle.
 

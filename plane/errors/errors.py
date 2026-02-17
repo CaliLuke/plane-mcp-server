@@ -12,6 +12,6 @@ class ConfigurationError(PlaneError):
 
 
 class HttpError(PlaneError):
-    def __init__(self, message: str, status_code: int, response: object | None = None) -> None:
+    def __init__(self, message: str, status_code: int | None, response: object | None = None) -> None:
         super().__init__(message, status_code=status_code)
         self.response = response

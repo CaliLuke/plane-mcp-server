@@ -101,7 +101,7 @@ class Modules(BaseResource):
         workspace_slug: str,
         project_id: str,
         module_id: str,
-        issue_ids: [str],
+        issue_ids: list[str],
     ) -> None:
         """Add work items to a module.
 

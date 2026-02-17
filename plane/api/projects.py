@@ -73,7 +73,7 @@ class Projects(BaseResource):
         response = self._get(f"{workspace_slug}/projects", params=query_params)
         return PaginatedProjectResponse.model_validate(response)
 
-    def get_worklog_summary(self, workspace_slug: str, project_id: str) -> [ProjectWorklogSummary]:
+    def get_worklog_summary(self, workspace_slug: str, project_id: str) -> list[ProjectWorklogSummary]:
         """Get work log summary for a project.
 
         Args:
@@ -85,7 +85,7 @@ class Projects(BaseResource):
 
     def get_members(
         self, workspace_slug: str, project_id: str, params: Mapping[str, Any] | None = None
-    ) -> [UserLite]:
+    ) -> list[UserLite]:
         """Get all members of a project.
 
         Args:

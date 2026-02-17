@@ -11,7 +11,7 @@ class Workspaces(BaseResource):
 
     def get_members(
         self, workspace_slug: str
-    ) -> [UserLite]:
+    ) -> list[UserLite]:
         """Get all members of a workspace.
 
         Args:

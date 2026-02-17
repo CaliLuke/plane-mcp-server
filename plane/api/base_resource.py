@@ -81,7 +81,7 @@ class BaseResource:
     def _handle_response(self, response: requests.Response) -> Any:
         if response.status_code == 204:
             return None
-        if 200 <= response.status_code < 300:
+        if response.status_code is not None and 200 <= response.status_code < 300:
             if not response.content:
                 return None
             if "application/json" in response.headers.get("content-type", "").lower():

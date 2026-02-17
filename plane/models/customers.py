@@ -115,11 +115,11 @@ class CustomerProperty(BaseModel):
     workspace: str | None = None
 
     @field_serializer("property_type")
-    def serialize_property_type(self, value: PropertyType) -> str:
+    def serialize_property_type(self, value: PropertyType) -> str | None:
         return value.value if value else None
 
     @field_serializer("relation_type")
-    def serialize_relation_type(self, value: RelationType) -> str:
+    def serialize_relation_type(self, value: RelationType) -> str | None:
         return value.value if value else None
 
 
@@ -145,11 +145,11 @@ class CreateCustomerProperty(BaseModel):
     external_id: str | None = None
 
     @field_serializer("property_type")
-    def serialize_property_type(self, value: PropertyType) -> str:
+    def serialize_property_type(self, value: PropertyType) -> str | None:
         return value.value if value else None
 
     @field_serializer("relation_type")
-    def serialize_relation_type(self, value: RelationType) -> str:
+    def serialize_relation_type(self, value: RelationType) -> str | None:
         return value.value if value else None
 
     @model_validator(mode="after")
@@ -208,11 +208,11 @@ class UpdateCustomerProperty(BaseModel):
     updated_by: str | None = None
 
     @field_serializer("property_type")
-    def serialize_property_type(self, value: PropertyType) -> str:
+    def serialize_property_type(self, value: PropertyType) -> str | None:
         return value.value if value else None
 
     @field_serializer("relation_type")
-    def serialize_relation_type(self, value: RelationType) -> str:
+    def serialize_relation_type(self, value: RelationType) -> str | None:
         return value.value if value else None
 
     @model_validator(mode="after")
