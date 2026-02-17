@@ -71,7 +71,7 @@ def register_initiative_tools(mcp: FastMCP) -> None:
             start_date=start_date,
             end_date=end_date,
             logo_props=logo_props,
-            state=state,
+            state=InitiativeState(state) if isinstance(state, str) else state,
             lead=lead,
         )
 
@@ -130,7 +130,7 @@ def register_initiative_tools(mcp: FastMCP) -> None:
             start_date=start_date,
             end_date=end_date,
             logo_props=logo_props,
-            state=state,
+            state=InitiativeState(state) if isinstance(state, str) else state,
             lead=lead,
         )
 

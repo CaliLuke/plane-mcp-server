@@ -25,7 +25,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         cursor: str | None = None,
         per_page: int | None = None,
         order_by: str | None = None,
-    ) -> list[ProjectSummary]:
+    ) -> list[dict]:
         """
         List all projects in a workspace.
 
@@ -73,7 +73,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         external_source: str | None = None,
         external_id: str | None = None,
         is_issue_type_enabled: bool | None = None,
-    ) -> ProjectSummary:
+    ) -> dict:
         """
         Create a new project.
 
@@ -129,7 +129,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         return _to_project_summary(p).slim()
 
     @mcp.tool()
-    def retrieve_project(project_id: str) -> ProjectSummary:
+    def retrieve_project(project_id: str) -> dict:
         """
         Retrieve a project by ID.
 
@@ -168,7 +168,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         is_time_tracking_enabled: bool | None = None,
         default_state: str | None = None,
         estimate: str | None = None,
-    ) -> ProjectSummary:
+    ) -> dict:
         """
         Update a project by ID.
 

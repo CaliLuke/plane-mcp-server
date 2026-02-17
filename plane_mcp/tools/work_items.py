@@ -32,7 +32,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         order_by: str | None = None,
         external_id: str | None = None,
         external_source: str | None = None,
-    ) -> list[WorkItemSummary]:
+    ) -> list[dict]:
         """
         List all work items in a project.
 
@@ -86,7 +86,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         state: str | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
-    ) -> WorkItemSummary:
+    ) -> dict:
         """
         Create a new work item.
 
@@ -151,7 +151,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         external_id: str | None = None,
         external_source: str | None = None,
         order_by: str | None = None,
-    ) -> WorkItemFull:
+    ) -> dict:
         """
         Retrieve a work item by ID.
 
@@ -194,7 +194,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         external_id: str | None = None,
         external_source: str | None = None,
         order_by: str | None = None,
-    ) -> WorkItemFull:
+    ) -> dict:
         """
         Retrieve a work item by project identifier and issue sequence number.
 
@@ -250,7 +250,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         state: str | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
-    ) -> WorkItemSummary:
+    ) -> dict:
         """
         Update a work item by ID.
 

@@ -23,7 +23,7 @@ def get_oauth_mcp(base_path: str = '/'):
     # Initialize the MCP server
     oauth_mcp = FastMCP(
         "Plane MCP Server",
-        icons=[Icon(src="https://plane.so/favicon.ico", alt="Plane MCP Server")],
+        icons=[Icon(src="https://plane.so/favicon.ico")],
         website_url="https://plane.so",
         auth=PlaneOAuthProvider(
             client_id=os.getenv("PLANE_OAUTH_PROVIDER_CLIENT_ID", ""),

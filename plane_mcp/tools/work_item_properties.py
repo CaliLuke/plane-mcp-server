@@ -6,6 +6,7 @@ from fastmcp import FastMCP
 from plane.models.enums import PropertyType, RelationType
 from plane.models.work_item_properties import (
     CreateWorkItemProperty,
+    CreateWorkItemPropertyOption,
     UpdateWorkItemProperty,
     WorkItemProperty,
 )
@@ -110,8 +111,8 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
         data = CreateWorkItemProperty(
             display_name=display_name,
-            property_type=property_type,
-            relation_type=relation_type,
+            property_type=PropertyType(property_type) if isinstance(property_type, str) else property_type,
+            relation_type=RelationType(relation_type) if isinstance(relation_type, str) else relation_type,
             description=description,
             is_required=is_required,
             default_value=default_value,
@@ -121,7 +122,7 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
             validation_rules=validation_rules,
             external_source=external_source,
             external_id=external_id,
-            options=options,
+            options=[CreateWorkItemPropertyOption(**o) for o in options] if options else None,
         )
 
         return client.work_item_properties.create(
@@ -215,8 +216,8 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
         data = UpdateWorkItemProperty(
             display_name=display_name,
-            property_type=property_type,
-            relation_type=relation_type,
+            property_type=PropertyType(property_type) if isinstance(property_type, str) else property_type,
+            relation_type=RelationType(relation_type) if isinstance(relation_type, str) else relation_type,
             description=description,
             is_required=is_required,
             default_value=default_value,
