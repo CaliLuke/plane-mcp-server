@@ -12,6 +12,7 @@ from plane.models.work_items import (
 )
 
 from plane_mcp.client import get_plane_client_context
+from plane_mcp.uid import ShortUUID
 from plane_mcp.models import (
     AssigneeSummary,
     LabelSummary,
@@ -26,7 +27,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_work_items(
-        project_id: str,
+        project_id: ShortUUID,
         cursor: str | None = None,
         per_page: int | None = None,
         order_by: str | None = None,
@@ -67,10 +68,10 @@ def register_work_item_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_work_item(
-        project_id: str,
+        project_id: ShortUUID,
         name: str,
-        assignees: list[str] | None = None,
-        labels: list[str] | None = None,
+        assignees: list[ShortUUID] | None = None,
+        labels: list[ShortUUID] | None = None,
         type_id: str | None = None,
         point: int | None = None,
         description_html: str | None = None,
@@ -82,8 +83,8 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         is_draft: bool | None = None,
         external_source: str | None = None,
         external_id: str | None = None,
-        parent: str | None = None,
-        state: str | None = None,
+        parent: ShortUUID | None = None,
+        state: ShortUUID | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
     ) -> dict:
@@ -144,8 +145,8 @@ def register_work_item_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def retrieve_work_item(
-        project_id: str,
-        work_item_id: str,
+        project_id: ShortUUID,
+        work_item_id: ShortUUID,
         expand: str | None = None,
         fields: str | None = None,
         external_id: str | None = None,
@@ -230,11 +231,11 @@ def register_work_item_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_work_item(
-        project_id: str,
-        work_item_id: str,
+        project_id: ShortUUID,
+        work_item_id: ShortUUID,
         name: str | None = None,
-        assignees: list[str] | None = None,
-        labels: list[str] | None = None,
+        assignees: list[ShortUUID] | None = None,
+        labels: list[ShortUUID] | None = None,
         type_id: str | None = None,
         point: int | None = None,
         description_html: str | None = None,
@@ -246,8 +247,8 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         is_draft: bool | None = None,
         external_source: str | None = None,
         external_id: str | None = None,
-        parent: str | None = None,
-        state: str | None = None,
+        parent: ShortUUID | None = None,
+        state: ShortUUID | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
     ) -> dict:
@@ -311,7 +312,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         return _to_work_item_summary(item).slim()
 
     @mcp.tool()
-    def delete_work_item(project_id: str, work_item_id: str) -> None:
+    def delete_work_item(project_id: ShortUUID, work_item_id: ShortUUID) -> None:
         """
         Delete a work item by ID.
 

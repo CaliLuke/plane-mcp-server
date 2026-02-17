@@ -16,6 +16,7 @@ from plane.models.work_item_property_configurations import (
 )
 
 from plane_mcp.client import get_plane_client_context
+from plane_mcp.uid import ShortUUID
 
 # Type alias for settings
 PropertySettings = TextAttributeSettings | DateAttributeSettings | dict | None
@@ -26,8 +27,8 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_work_item_properties(
-        project_id: str,
-        type_id: str,
+        project_id: ShortUUID,
+        type_id: ShortUUID,
         params: dict[str, Any] | None = None,
     ) -> list[WorkItemProperty]:
         """
@@ -52,8 +53,8 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_work_item_property(
-        project_id: str,
-        type_id: str,
+        project_id: ShortUUID,
+        type_id: ShortUUID,
         display_name: str,
         property_type: PropertyType | str,
         relation_type: RelationType | str | None = None,
@@ -131,9 +132,9 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def retrieve_work_item_property(
-        project_id: str,
-        type_id: str,
-        work_item_property_id: str,
+        project_id: ShortUUID,
+        type_id: ShortUUID,
+        work_item_property_id: ShortUUID,
     ) -> WorkItemProperty:
         """
         Retrieve a work item property by ID.
@@ -157,9 +158,9 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_work_item_property(
-        project_id: str,
-        type_id: str,
-        work_item_property_id: str,
+        project_id: ShortUUID,
+        type_id: ShortUUID,
+        work_item_property_id: ShortUUID,
         display_name: str | None = None,
         property_type: PropertyType | str | None = None,
         relation_type: RelationType | str | None = None,
@@ -239,9 +240,9 @@ def register_work_item_property_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def delete_work_item_property(
-        project_id: str,
-        type_id: str,
-        work_item_property_id: str,
+        project_id: ShortUUID,
+        type_id: ShortUUID,
+        work_item_property_id: ShortUUID,
     ) -> None:
         """
         Delete a work item property by ID.

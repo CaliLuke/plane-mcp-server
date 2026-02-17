@@ -4,6 +4,7 @@ from fastmcp import FastMCP
 from plane.models.states import PaginatedStateResponse
 
 from plane_mcp.client import get_plane_client_context
+from plane_mcp.uid import ShortUUID
 from plane_mcp.models import StateSummary
 
 
@@ -18,7 +19,7 @@ def register_state_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_states(
-        project_id: str,
+        project_id: ShortUUID,
     ) -> list[StateSummary]:
         """
         List all states for a project.

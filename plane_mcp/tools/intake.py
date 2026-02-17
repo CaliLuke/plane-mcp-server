@@ -12,6 +12,7 @@ from plane.models.intake import (
 from plane.models.query_params import PaginatedQueryParams, RetrieveQueryParams
 
 from plane_mcp.client import get_plane_client_context
+from plane_mcp.uid import ShortUUID
 
 
 def register_intake_tools(mcp: FastMCP) -> None:
@@ -19,7 +20,7 @@ def register_intake_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def list_intake_work_items(
-        project_id: str,
+        project_id: ShortUUID,
         params: dict[str, Any] | None = None,
     ) -> list[IntakeWorkItem]:
         """
@@ -46,7 +47,7 @@ def register_intake_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def create_intake_work_item(
-        project_id: str,
+        project_id: ShortUUID,
         data: dict[str, Any],
     ) -> IntakeWorkItem:
         """
@@ -70,8 +71,8 @@ def register_intake_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def retrieve_intake_work_item(
-        project_id: str,
-        work_item_id: str,
+        project_id: ShortUUID,
+        work_item_id: ShortUUID,
         params: dict[str, Any] | None = None,
     ) -> IntakeWorkItem:
         """
@@ -102,8 +103,8 @@ def register_intake_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_intake_work_item(
-        project_id: str,
-        work_item_id: str,
+        project_id: ShortUUID,
+        work_item_id: ShortUUID,
         data: dict[str, Any],
     ) -> IntakeWorkItem:
         """
@@ -131,7 +132,7 @@ def register_intake_tools(mcp: FastMCP) -> None:
         )
 
     @mcp.tool()
-    def delete_intake_work_item(project_id: str, work_item_id: str) -> None:
+    def delete_intake_work_item(project_id: ShortUUID, work_item_id: ShortUUID) -> None:
         """
         Delete an intake work item by work item ID.
 

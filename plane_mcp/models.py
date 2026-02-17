@@ -4,13 +4,15 @@ from html.parser import HTMLParser
 
 from pydantic import BaseModel, ConfigDict
 
+from plane_mcp import uid
+
 
 class _SlimBase(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     def slim(self) -> dict:
-        """Serialize to dict, dropping None values."""
-        return self.model_dump(exclude_none=True)
+        """Serialize to dict, dropping None values, encoding UUIDs to short form."""
+        return uid.encode_value(self.model_dump(exclude_none=True))  # type: ignore[return-value]
 
 
 # ---------------------------------------------------------------------------

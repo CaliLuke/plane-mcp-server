@@ -15,6 +15,7 @@ from plane.models.users import UserLite
 
 from plane_mcp.client import get_plane_client_context
 from plane_mcp.models import ProjectSummary
+from plane_mcp.uid import ShortUUID
 
 
 def register_project_tools(mcp: FastMCP) -> None:
@@ -129,7 +130,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         return _to_project_summary(p).slim()
 
     @mcp.tool()
-    def retrieve_project(project_id: str) -> dict:
+    def retrieve_project(project_id: ShortUUID) -> dict:
         """
         Retrieve a project by ID.
 
@@ -145,7 +146,7 @@ def register_project_tools(mcp: FastMCP) -> None:
 
     @mcp.tool()
     def update_project(
-        project_id: str,
+        project_id: ShortUUID,
         name: str | None = None,
         description: str | None = None,
         project_lead: str | None = None,
@@ -233,7 +234,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         return _to_project_summary(p).slim()
 
     @mcp.tool()
-    def delete_project(project_id: str) -> None:
+    def delete_project(project_id: ShortUUID) -> None:
         """
         Delete a project by ID.
 
