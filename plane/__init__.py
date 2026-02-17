@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .api.agent_runs import AgentRuns
 from .api.cycles import Cycles
 from .api.initiatives import Initiatives

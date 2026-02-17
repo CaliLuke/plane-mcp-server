@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """
 Enum and Literal types used across Plane SDK models.
 """

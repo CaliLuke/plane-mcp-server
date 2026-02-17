@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Plane API clients."""
 
 from .oauth_client import (

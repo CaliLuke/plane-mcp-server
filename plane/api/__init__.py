@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .base_resource import BaseResource
 from .customers import Customers
 from .initiatives import Initiatives

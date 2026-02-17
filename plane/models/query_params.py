@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 """Query parameter DTOs for list/retrieve endpoints."""
 
 from pydantic import BaseModel, ConfigDict, Field
