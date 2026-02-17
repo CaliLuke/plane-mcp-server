@@ -1,6 +1,6 @@
 # plane-mcp-server
 
-I think the original Plane MCP server was quite bad — verbose, poorly thought out, and returning oceans of tokens for no reason. So I made my own. Feel free to use it without any guarantees whatsoever.
+The official Plane MCP server returns way more data than any AI agent needs, burning tokens on noise. This is a leaner fork with compact response models and a few quality-of-life improvements. Use it if it's useful to you — no guarantees.
 
 ## What's different
 
