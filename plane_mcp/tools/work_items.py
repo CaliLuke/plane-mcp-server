@@ -13,6 +13,7 @@ from plane.models.work_items import (
 
 from plane_mcp.client import get_plane_client_context
 from plane_mcp.uid import ShortUUID
+from plane_mcp import formatting
 from plane_mcp.models import (
     AssigneeSummary,
     LabelSummary,
@@ -33,7 +34,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         order_by: str | None = None,
         external_id: str | None = None,
         external_source: str | None = None,
-    ) -> list[dict]:
+    ) -> list[str]:
         """
         List all work items in a project.
 
@@ -64,7 +65,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             params=params,
         )
 
-        return [_to_work_item_summary(item).slim() for item in response.results]
+        return [formatting.work_item(item) for item in response.results]
 
     @mcp.tool()
     def create_work_item(

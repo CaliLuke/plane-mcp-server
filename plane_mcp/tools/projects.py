@@ -16,6 +16,7 @@ from plane.models.users import UserLite
 from plane_mcp.client import get_plane_client_context
 from plane_mcp.models import ProjectSummary
 from plane_mcp.uid import ShortUUID
+from plane_mcp import formatting
 
 
 def register_project_tools(mcp: FastMCP) -> None:
@@ -26,7 +27,7 @@ def register_project_tools(mcp: FastMCP) -> None:
         cursor: str | None = None,
         per_page: int | None = None,
         order_by: str | None = None,
-    ) -> list[dict]:
+    ) -> list[str]:
         """
         List all projects in a workspace.
 
@@ -51,7 +52,7 @@ def register_project_tools(mcp: FastMCP) -> None:
             params=params,
         )
 
-        return [_to_project_summary(p).slim() for p in response.results]
+        return [formatting.project(p) for p in response.results]
 
     @mcp.tool()
     def create_project(
