@@ -34,7 +34,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["plane_mcp*"]
+include = ["plane_mcp*", "plane*"]
 
 [tool.black]
 line-length = 100
