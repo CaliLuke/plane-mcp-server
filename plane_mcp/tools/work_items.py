@@ -387,11 +387,13 @@ def _to_work_item_summary(item) -> WorkItemSummary:
 
 def _to_work_item_full(detail: WorkItemDetail) -> WorkItemFull:
     assignees = [
-        AssigneeSummary(id=a.id, display_name=a.display_name)
+        AssigneeSummary(id=a, display_name=None) if isinstance(a, str)
+        else AssigneeSummary(id=a.id, display_name=a.display_name)
         for a in (detail.assignees or [])
     ]
     labels = [
-        LabelSummary(id=lb.id, name=lb.name, color=lb.color)
+        LabelSummary(id=lb, name=lb) if isinstance(lb, str)
+        else LabelSummary(id=lb.id, name=lb.name, color=lb.color)
         for lb in (detail.labels or [])
     ]
     state = detail.state if isinstance(detail.state, str) else getattr(detail.state, "id", None)

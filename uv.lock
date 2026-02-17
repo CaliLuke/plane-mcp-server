@@ -823,7 +823,6 @@ source = { editable = "." }
 dependencies = [
     { name = "fastmcp" },
     { name = "mcp" },
-    { name = "plane-sdk" },
     { name = "py-key-value-aio", extra = ["redis"] },
 ]
 
@@ -840,26 +839,12 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "fastmcp", git = "https://github.com/jlowin/fastmcp.git?rev=v3.0.0rc2" },
     { name = "mcp", specifier = "==1.24.0" },
-    { name = "plane-sdk", specifier = "==0.2.2" },
     { name = "py-key-value-aio", extras = ["redis"], specifier = ">=0.4.0,<0.5.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.21.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.1.0" },
 ]
 provides-extras = ["dev"]
-
-[[package]]
-name = "plane-sdk"
-version = "0.2.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "pydantic" },
-    { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/44/ee/ac7c0e4eea10b4324bb2b91fd7ef0bd690dc0d7c75ad63d0133975917c6e/plane_sdk-0.2.2.tar.gz", hash = "sha256:257e0068d91d56479909fc3c543c4d56668e76c69fd0561f352f420305662348", size = 45060, upload-time = "2025-11-29T10:00:30.222Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/10/a1/7deeb618fa1b7f90bfa89ec5ec93e5d50c9958cfbd5336c5bd7823f8b15a/plane_sdk-0.2.2-py3-none-any.whl", hash = "sha256:94765d29d870e40cc2bc8a067f2b917cf3ab4b6dbc249914900f0366b8996e4f", size = 65759, upload-time = "2025-11-29T10:00:28.845Z" },
-]
 
 [[package]]
 name = "platformdirs"
