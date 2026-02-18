@@ -12,7 +12,7 @@ from plane.models.work_items import (
 )
 
 from plane_mcp.client import get_plane_client_context
-from plane_mcp.uid import ShortUUID
+from plane_mcp.uid import ShortUUID, _UUID_RE
 from plane_mcp import formatting
 from plane_mcp.models import (
     AssigneeSummary,
@@ -21,6 +21,44 @@ from plane_mcp.models import (
     WorkItemSummary,
     strip_html,
 )
+
+
+def _is_uuid_like(s: str) -> bool:
+    """Return True if s looks like a full UUID or a shortUUID (base57, ~22 chars)."""
+    if _UUID_RE.match(s):
+        return True
+    # shortUUIDs are 22 alphanumeric chars (base57)
+    if len(s) >= 20 and s.isalnum():
+        return True
+    return False
+
+
+def _resolve_state(client, workspace_slug: str, project_id: str, state: str | None) -> str | None:
+    """Resolve a state name like 'Done' to its UUID. Pass through UUIDs unchanged."""
+    if state is None:
+        return None
+    if _is_uuid_like(state):
+        return state
+    # Fetch states and match by name (case-insensitive)
+    from plane.models.states import PaginatedStateResponse
+    response: PaginatedStateResponse = client.states.list(
+        workspace_slug=workspace_slug, project_id=project_id,
+    )
+    lower = state.lower()
+    for s in response.results:
+        if s.name and s.name.lower() == lower:
+            return s.id
+    valid = [s.name for s in response.results if s.name]
+    raise ValueError(f"Unknown state {state!r}. Valid states: {', '.join(valid)}")
+
+
+def _ensure_expand(expand: str | None, *fields: str) -> str:
+    """Merge *fields* into a comma-separated expand string, avoiding duplicates."""
+    parts = [p.strip() for p in (expand or "").split(",") if p.strip()]
+    for f in fields:
+        if f not in parts:
+            parts.append(f)
+    return ",".join(parts)
 
 
 def register_work_item_tools(mcp: FastMCP) -> None:
@@ -60,7 +98,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             order_by=order_by,
             external_id=external_id,
             external_source=external_source,
-            expand="state",
+            expand="state,assignees",
         )
 
         response: PaginatedWorkItemResponse = client.work_items.list(
@@ -100,7 +138,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         external_source: str | None = None,
         external_id: str | None = None,
         parent: ShortUUID | None = None,
-        state: ShortUUID | None = None,
+        state: str | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
     ) -> dict:
@@ -124,7 +162,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             external_source: External system source name
             external_id: External system identifier
             parent: UUID of the parent work item
-            state: UUID of the state
+            state: State name (e.g. "Done", "In Progress") or UUID
             estimate_point: Estimate point value
             type: Work item type identifier
 
@@ -132,6 +170,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             Created WorkItemSummary object
         """
         client, workspace_slug = get_plane_client_context()
+        state = _resolve_state(client, workspace_slug, project_id, state)
 
         data = CreateWorkItem(
             name=name,
@@ -157,7 +196,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         item = client.work_items.create(
             workspace_slug=workspace_slug, project_id=project_id, data=data
         )
-        return _to_work_item_summary(item).slim()
+        return _retrieve_expanded(client, workspace_slug, project_id, item.id)
 
     @mcp.tool()
     def retrieve_work_item(
@@ -187,7 +226,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         client, workspace_slug = get_plane_client_context()
 
         params = RetrieveQueryParams(
-            expand=expand,
+            expand=_ensure_expand(expand, "state", "assignees"),
             fields=fields,
             external_id=external_id,
             external_source=external_source,
@@ -230,7 +269,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         client, workspace_slug = get_plane_client_context()
 
         params = RetrieveQueryParams(
-            expand=expand,
+            expand=_ensure_expand(expand, "state", "assignees"),
             fields=fields,
             external_id=external_id,
             external_source=external_source,
@@ -264,7 +303,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         external_source: str | None = None,
         external_id: str | None = None,
         parent: ShortUUID | None = None,
-        state: ShortUUID | None = None,
+        state: str | None = None,
         estimate_point: str | None = None,
         type: str | None = None,
     ) -> dict:
@@ -289,7 +328,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             external_source: External system source name
             external_id: External system identifier
             parent: UUID of the parent work item
-            state: UUID of the state
+            state: State name (e.g. "Done", "In Progress") or UUID
             estimate_point: Estimate point value
             type: Work item type identifier
 
@@ -297,6 +336,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             Updated WorkItemSummary object
         """
         client, workspace_slug = get_plane_client_context()
+        state = _resolve_state(client, workspace_slug, project_id, state)
 
         data = UpdateWorkItem(
             name=name,
@@ -325,7 +365,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             work_item_id=work_item_id,
             data=data,
         )
-        return _to_work_item_summary(item).slim()
+        return _retrieve_expanded(client, workspace_slug, project_id, item.id)
 
     @mcp.tool()
     def delete_work_item(project_id: ShortUUID, work_item_id: ShortUUID) -> None:
@@ -380,6 +420,17 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         return client.work_items.search(workspace_slug=workspace_slug, query=query, params=params)
 
 
+def _retrieve_expanded(client, workspace_slug: str, project_id: str, work_item_id: str) -> dict:
+    """Re-fetch a work item with state+assignees expanded, return slim summary."""
+    detail = client.work_items.retrieve(
+        workspace_slug=workspace_slug,
+        project_id=project_id,
+        work_item_id=work_item_id,
+        params=RetrieveQueryParams(expand="state,assignees"),
+    )
+    return _to_work_item_summary(detail).slim()
+
+
 def _enum_str(v) -> str | None:
     if v is None:
         return None
@@ -389,15 +440,18 @@ def _enum_str(v) -> str | None:
 def _to_work_item_summary(item) -> WorkItemSummary:
     assignees = getattr(item, "assignees", None) or []
     labels = getattr(item, "labels", None) or []
-    assignee_ids = [a if isinstance(a, str) else a.id for a in assignees if a]
+    assignee_names = [
+        a if isinstance(a, str) else (getattr(a, "display_name", None) or a.id)
+        for a in assignees if a
+    ]
     label_ids = [lb if isinstance(lb, str) else lb.id for lb in labels if lb]
     return WorkItemSummary(
         id=item.id,
         sequence_id=item.sequence_id,
         name=item.name,
         priority=_enum_str(item.priority),
-        state=item.state if isinstance(item.state, str) else getattr(item.state, "id", None),
-        assignees=[a for a in assignee_ids if a],
+        state=item.state if isinstance(item.state, str) else getattr(item.state, "name", None) or getattr(item.state, "id", None),
+        assignees=[a for a in assignee_names if a],
         labels=[lb for lb in label_ids if lb],
     )
 
@@ -405,7 +459,10 @@ def _to_work_item_summary(item) -> WorkItemSummary:
 def _to_work_item_full(detail: WorkItemDetail) -> WorkItemFull:
     assignees = [
         AssigneeSummary(id=a, display_name=None) if isinstance(a, str)
-        else AssigneeSummary(id=a.id, display_name=a.display_name)
+        else AssigneeSummary(
+            id=None if a.display_name else a.id,
+            display_name=a.display_name,
+        )
         for a in (detail.assignees or [])
     ]
     labels = [
@@ -413,7 +470,7 @@ def _to_work_item_full(detail: WorkItemDetail) -> WorkItemFull:
         else LabelSummary(id=lb.id, name=lb.name, color=lb.color)
         for lb in (detail.labels or [])
     ]
-    state = detail.state if isinstance(detail.state, str) else getattr(detail.state, "id", None)
+    state = detail.state if isinstance(detail.state, str) else getattr(detail.state, "name", None) or getattr(detail.state, "id", None)
     return WorkItemFull(
         id=detail.id,
         sequence_id=detail.sequence_id,

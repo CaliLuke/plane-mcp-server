@@ -5,7 +5,6 @@ from plane.models.states import PaginatedStateResponse
 
 from plane_mcp.client import get_plane_client_context
 from plane_mcp.uid import ShortUUID
-from plane_mcp import formatting
 
 
 def register_state_tools(mcp: FastMCP) -> None:
@@ -16,15 +15,16 @@ def register_state_tools(mcp: FastMCP) -> None:
         project_id: ShortUUID,
     ) -> list[str]:
         """
-        List all states for a project.
+        List valid state names for a project.
 
-        Use this to get state UUIDs needed when creating or updating work items.
+        Use this to discover which state names can be passed to
+        create_work_item / update_work_item.
 
         Args:
             project_id: UUID of the project
 
         Returns:
-            List of StateSummary objects containing id, name, group, color, default, sequence.
+            List of state names grouped by workflow group, e.g. "Done (completed)".
         """
         client, workspace_slug = get_plane_client_context()
 
@@ -33,4 +33,9 @@ def register_state_tools(mcp: FastMCP) -> None:
             project_id=project_id,
         )
 
-        return [formatting.state(s) for s in response.results]
+        def _fmt(s) -> str:
+            group = s.group.value if hasattr(s.group, "value") else str(s.group or "")
+            default = " *" if s.default else ""
+            return f"{s.name} ({group}){default}"
+
+        return [_fmt(s) for s in response.results]
