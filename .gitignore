@@ -26,4 +26,4 @@ token-use.md
 legacy/.venv/
 legacy/.ruff_cache/
 legacy/*.egg-info/
-legacy/__pycache__/
+legacy/**/__pycache__/
