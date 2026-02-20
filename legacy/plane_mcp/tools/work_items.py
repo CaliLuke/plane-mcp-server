@@ -70,22 +70,24 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         cursor: str | None = None,
         per_page: int | None = None,
         order_by: str | None = None,
+        include_completed: bool = False,
         external_id: str | None = None,
         external_source: str | None = None,
     ) -> list[str]:
         """
-        List all work items in a project.
+        List work items in a project. By default excludes completed/cancelled items.
 
         Args:
             project_id: UUID of the project
             cursor: Pagination cursor for getting next set of results
             per_page: Number of results per page (1-100)
             order_by: Field to order results by. Prefix with '-' for descending order
+            include_completed: Include items in Done/Cancelled states (default: false)
             external_id: External system identifier for filtering or lookup
             external_source: External system source name for filtering or lookup
 
         Returns:
-            List of WorkItemSummary objects (no description HTML — use retrieve_work_item for full detail).
+            List of work item summaries (use retrieve_work_item for full detail).
         """
         client, workspace_slug = get_plane_client_context()
 
@@ -98,7 +100,7 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             order_by=order_by,
             external_id=external_id,
             external_source=external_source,
-            expand="state,assignees",
+            expand="state",
         )
 
         response: PaginatedWorkItemResponse = client.work_items.list(
@@ -106,6 +108,8 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             project_id=project_id,
             params=params,
         )
+
+        _CLOSED_GROUPS = {"completed", "cancelled"}
 
         def _state_name(item) -> str | None:
             s = item.state
@@ -115,9 +119,16 @@ def register_work_item_tools(mcp: FastMCP) -> None:
                 return None
             return getattr(s, "name", None)
 
+        def _state_group(item) -> str | None:
+            s = item.state
+            if s is None or isinstance(s, str):
+                return None
+            return getattr(s, "group", None)
+
         return [
             formatting.work_item(item, project_identifier, _state_name(item))
             for item in response.results
+            if include_completed or _state_group(item) not in _CLOSED_GROUPS
         ]
 
     @mcp.tool()
@@ -196,7 +207,9 @@ def register_work_item_tools(mcp: FastMCP) -> None:
         item = client.work_items.create(
             workspace_slug=workspace_slug, project_id=project_id, data=data
         )
-        return _retrieve_expanded(client, workspace_slug, project_id, item.id)
+        project = client.projects.retrieve(workspace_slug=workspace_slug, project_id=project_id)
+        identifier = f"{project.identifier or '?'}-{item.sequence_id}"
+        return {"message": f"{identifier} created successfully"}
 
     @mcp.tool()
     def retrieve_work_item(
@@ -365,7 +378,9 @@ def register_work_item_tools(mcp: FastMCP) -> None:
             work_item_id=work_item_id,
             data=data,
         )
-        return _retrieve_expanded(client, workspace_slug, project_id, item.id)
+        project = client.projects.retrieve(workspace_slug=workspace_slug, project_id=project_id)
+        identifier = f"{project.identifier or '?'}-{item.sequence_id}"
+        return {"message": f"{identifier} updated successfully"}
 
     @mcp.tool()
     def delete_work_item(project_id: ShortUUID, work_item_id: ShortUUID) -> None:
