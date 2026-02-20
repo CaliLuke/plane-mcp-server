@@ -7,11 +7,40 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 )
+
+// debugLogger is nil when PLANE_DEBUG is unset. When PLANE_DEBUG is a file
+// path, logs go to that file. When PLANE_DEBUG is "1" or "true", logs go to
+// /tmp/plane-debug.log.
+var debugLogger *log.Logger
+
+func init() {
+	v := os.Getenv("PLANE_DEBUG")
+	if v == "" {
+		return
+	}
+	path := v
+	if path == "1" || path == "true" {
+		path = "/tmp/plane-debug.log"
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return
+	}
+	debugLogger = log.New(f, "[plane] ", log.LstdFlags)
+}
+
+func debugLog(format string, args ...any) {
+	if debugLogger != nil {
+		debugLogger.Printf(format, args...)
+	}
+}
 
 // Client is a lightweight Plane API client.
 type Client struct {
@@ -42,7 +71,13 @@ type HttpError struct {
 }
 
 func (e *HttpError) Error() string {
-	return fmt.Sprintf("HTTP %d: %s", e.StatusCode, e.Message)
+	if e.Payload != nil {
+		data, err := json.Marshal(e.Payload)
+		if err == nil && string(data) != "null" {
+			return fmt.Sprintf("HTTP %d: %s", e.StatusCode, string(data))
+		}
+	}
+	return fmt.Sprintf("HTTP %d: %s", e.StatusCode, http.StatusText(e.StatusCode))
 }
 
 func (c *Client) buildURL(endpoint string) string {
@@ -77,12 +112,19 @@ func (c *Client) do(ctx context.Context, method, endpoint string, body any, para
 	}
 
 	var bodyReader io.Reader
+	var bodyData []byte
 	if body != nil {
-		data, err := json.Marshal(body)
+		var err error
+		bodyData, err = json.Marshal(body)
 		if err != nil {
 			return nil, fmt.Errorf("marshal request body: %w", err)
 		}
-		bodyReader = bytes.NewReader(data)
+		bodyReader = bytes.NewReader(bodyData)
+	}
+
+	debugLog("%s %s", method, u)
+	if len(bodyData) > 0 {
+		debugLog("  body: %s", bodyData)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, method, u, bodyReader)
@@ -104,6 +146,11 @@ func (c *Client) do(ctx context.Context, method, endpoint string, body any, para
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("read response: %w", err)
+	}
+
+	debugLog("  response: %d (%d bytes)", resp.StatusCode, len(respBody))
+	if resp.StatusCode >= 400 && len(respBody) > 0 {
+		debugLog("  error body: %s", respBody)
 	}
 
 	if resp.StatusCode == 204 || len(respBody) == 0 {

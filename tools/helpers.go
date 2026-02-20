@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/CaliLuke/plane-mcp-server/plane"
@@ -224,12 +225,20 @@ func ensureExpand(expand string, fields ...string) string {
 }
 
 // stripNulls removes nil values from a map (for JSON request bodies).
+// Uses reflect to catch typed nils (e.g. []string(nil) stored as any).
 func stripNulls(m map[string]any) map[string]any {
 	out := make(map[string]any, len(m))
 	for k, v := range m {
-		if v != nil {
-			out[k] = v
+		if v == nil {
+			continue
 		}
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Ptr || rv.Kind() == reflect.Slice || rv.Kind() == reflect.Map {
+			if rv.IsNil() {
+				continue
+			}
+		}
+		out[k] = v
 	}
 	return out
 }
