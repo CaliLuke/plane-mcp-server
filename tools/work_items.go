@@ -367,7 +367,7 @@ func (r *Registry) handleDeleteWorkItem(ctx context.Context, req mcp.CallToolReq
 func (r *Registry) handleSearchWorkItems(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	query := getString(req, "query", "")
 	params := buildParams(
-		"q", query,
+		"search", query,
 		"expand", getString(req, "expand", ""),
 		"fields", getString(req, "fields", ""),
 		"order_by", getString(req, "order_by", ""),
